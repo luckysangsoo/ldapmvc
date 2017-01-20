@@ -1,8 +1,5 @@
 package in.erai.web.security;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -34,31 +31,36 @@ public class LoginSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     public void configureGlobal(AuthenticationManagerBuilder authenticationMgr) throws Exception {
 
-        List<String> userGroups = new ArrayList<>();
-        userGroups.add("uid={0},ou=users");
-
-        authenticationMgr.ldapAuthentication()
+        /*authenticationMgr.ldapAuthentication()
         .userSearchFilter("(uid={0})")
-
-
         .userSearchBase("ou=users,ou=system")
         .groupSearchFilter("(uniqueMember={0})")
-        .groupSearchBase("ou=users,ou=system")
+        .groupSearchBase("cn=developers,ou=groups,ou=system")
+        .contextSource(ldapContextSource());*/
+        authenticationMgr.ldapAuthentication()
+        .userSearchFilter("(uid={0})")
+        .userSearchBase("ou=users,ou=system")
+        .groupSearchFilter("(uniqueMember={0})")
+        .groupSearchBase("ou=groups,ou=system").groupRoleAttribute("cn").rolePrefix("ROLE_")
         .contextSource(ldapContextSource());
+
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-        .antMatchers("/homePage")
-        .fullyAuthenticated()
+        .antMatchers("/homePage").access("hasRole('ROLE_CHEMISTS')")
+        //.fullyAuthenticated()
+
         .and()
-            .formLogin().loginPage("/loginPage")
+            .formLogin().loginPage("/loginPage").permitAll()
             .defaultSuccessUrl("/homePage")
-            .failureUrl("/loginPage?error")
+            .failureUrl("/loginPage?error").permitAll()
             .usernameParameter("username").passwordParameter("password")
         .and()
             .logout().logoutSuccessUrl("/loginPage?logout");
+
+
 
     }
     @Bean
