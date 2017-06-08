@@ -39,9 +39,9 @@ public class LoginSecurityConfig extends WebSecurityConfigurerAdapter {
         .contextSource(ldapContextSource());*/
         authenticationMgr.ldapAuthentication()
         .userSearchFilter("(uid={0})")
-        .userSearchBase("ou=users,ou=system")
+        .userSearchBase("ou=people,dc=example,dc=com")
         .groupSearchFilter("(uniqueMember={0})")
-        .groupSearchBase("ou=groups,ou=system").groupRoleAttribute("cn").rolePrefix("ROLE_")
+        .groupSearchBase("ou=groups,dc=example,dc=com").groupRoleAttribute("cn").rolePrefix("ROLE_")
         .contextSource(ldapContextSource());
 
     }
@@ -49,7 +49,7 @@ public class LoginSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-        .antMatchers("/homePage").access("hasRole('ROLE_CHEMISTS')")
+        //.antMatchers("/homePage").access("hasRole('ROLE_CHEMISTS')")
         //.fullyAuthenticated()
 
         .and()
@@ -59,10 +59,8 @@ public class LoginSecurityConfig extends WebSecurityConfigurerAdapter {
             .usernameParameter("username").passwordParameter("password")
         .and()
             .logout().logoutSuccessUrl("/loginPage?logout");
-
-
-
     }
+    
     @Bean
     public LdapContextSource  ldapContextSource() {
 
@@ -74,6 +72,7 @@ public class LoginSecurityConfig extends WebSecurityConfigurerAdapter {
 
         return bean;
     }
+    
     @Bean
     public static PropertySourcesPlaceholderConfigurer placeHolderConfigurer() {
      return new PropertySourcesPlaceholderConfigurer();
